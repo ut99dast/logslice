@@ -1,5 +1,7 @@
 package filter
 
+import "fmt"
+
 // MultiFilter combines multiple FieldFilters with AND logic.
 type MultiFilter struct {
 	Filters []*FieldFilter
@@ -11,7 +13,7 @@ func NewMultiFilter(exprs []string) (*MultiFilter, error) {
 	for _, expr := range exprs {
 		f, err := NewFieldFilter(expr)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid filter expression %q: %w", expr, err)
 		}
 		filters = append(filters, f)
 	}
