@@ -1,28 +1,37 @@
-// Package filter provides primitives for parsing and filtering structured
-// (JSON) log records.
+// Package filter provides primitives for parsing, filtering, transforming,
+// and outputting structured (JSON) log records.
 //
-// # Record Parsing
+// # Parsing
 //
-// ParseRecord decodes a single JSON log line into a map[string]interface{}.
+// ParseRecord decodes a single JSON log line into a map.
 //
-// # Time Filtering
+// # Filtering
 //
-// NewTimeRange builds a TimeRange that can test whether a record's timestamp
-// field falls within a given [from, to] window. Both boundaries are optional.
+// Filters implement a common interface and can be combined with MultiFilter:
+//   - TimeRange – matches records whose timestamp falls within a time window.
+//   - FieldFilter – matches records where a named field equals a given value.
+//   - MultiFilter – composes multiple filters with AND semantics.
 //
-// # Field Filtering
+// # Transforming
 //
-// NewFieldFilter parses expressions of the form "field=value" or
-// "field!=value" into a FieldFilter. Multiple filters can be combined with
-// NewMultiFilter, which applies AND semantics across all contained filters.
+// Transformer applies an ordered chain of TransformFuncs to each record:
+//   - RenameField – renames a field key.
+//   - DropField   – removes a field from the record.
+//   - AddField    – sets a field to a static value.
+//   - RequireField – returns an error when a field is absent.
 //
-// # Typical usage
+// # Scanning
 //
-//	tr, _ := filter.NewTimeRange(from, to)
-//	mf, _ := filter.NewMultiFilter([]string{"level=error"})
+// Scanner reads an io.Reader line by line, applies a filter, and emits
+// matching records to a channel consumed by a Pipeline.
 //
-//	record, err := filter.ParseRecord(line)
-//	if err == nil && tr.Match(record) && mf.Match(record) {
-//		// emit record
-//	}
+// # Output
+//
+// Writer serialises records to JSON, pretty-printed JSON, or CSV.
+// Use ParseOutputFormat to resolve a format name from a CLI flag.
+//
+// # Statistics
+//
+// Stats tracks total lines read, valid JSON lines, and matched lines,
+// and can print a summary to any io.Writer.
 package filter
