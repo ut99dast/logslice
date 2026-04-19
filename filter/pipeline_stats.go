@@ -46,3 +46,8 @@ func (p *PipelineWithStats) Run(r io.Reader) error {
 	}
 	return p.writer.Flush()
 }
+
+// Reset clears the collected Stats, allowing the PipelineWithStats to be reused.
+func (p *PipelineWithStats) Reset() {
+	p.Stats = Stats{}
+}
