@@ -1,37 +1,35 @@
 // Package filter provides primitives for parsing, filtering, transforming,
-// and outputting structured (JSON) log records.
+// aggregating, and deduplicating structured (JSON) log records.
 //
 // # Parsing
 //
-// ParseRecord decodes a single JSON log line into a map.
+// ParseRecord parses a single JSON log line into a map.
 //
 // # Filtering
 //
-// Filters implement a common interface and can be combined with MultiFilter:
-//   - TimeRange – matches records whose timestamp falls within a time window.
-//   - FieldFilter – matches records where a named field equals a given value.
-//   - MultiFilter – composes multiple filters with AND semantics.
+// TimeRange and FieldFilter implement the Filter interface and can be
+// composed with MultiFilter for AND-semantics across multiple conditions.
 //
-// # Transforming
+// # Transformation
 //
-// Transformer applies an ordered chain of TransformFuncs to each record:
-//   - RenameField – renames a field key.
-//   - DropField   – removes a field from the record.
-//   - AddField    – sets a field to a static value.
-//   - RequireField – returns an error when a field is absent.
+// Transformer supports field-level operations: rename, drop, add, and
+// template-based computed fields. TransformPipeline chains transformers.
 //
-// # Scanning
+// # Aggregation
 //
-// Scanner reads an io.Reader line by line, applies a filter, and emits
-// matching records to a channel consumed by a Pipeline.
+// RunAggregate groups records by a key field and computes counts.
+//
+// # Deduplication
+//
+// Deduplicator tracks seen records by key fields (or whole-record hash)
+// and drops duplicates. RunDedupe integrates deduplication into a
+// streaming pipeline with Stats reporting.
 //
 // # Output
 //
-// Writer serialises records to JSON, pretty-printed JSON, or CSV.
-// Use ParseOutputFormat to resolve a format name from a CLI flag.
+// Writer supports JSON, pretty-printed JSON, and CSV output formats.
 //
 // # Statistics
 //
-// Stats tracks total lines read, valid JSON lines, and matched lines,
-// and can print a summary to any io.Writer.
+// Stats tracks valid, invalid, and matched record counts across a run.
 package filter
