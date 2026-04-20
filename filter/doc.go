@@ -1,35 +1,40 @@
 // Package filter provides primitives for parsing, filtering, transforming,
-// aggregating, and deduplicating structured (JSON) log records.
+// aggregating, and annotating structured (JSON) log records.
 //
-// # Parsing
+// # Core types
 //
-// ParseRecord parses a single JSON log line into a map.
+// ParseRecord parses a single JSON log line into a map[string]interface{}.
 //
 // # Filtering
 //
-// TimeRange and FieldFilter implement the Filter interface and can be
-// composed with MultiFilter for AND-semantics across multiple conditions.
+// TimeRange and FieldFilter let callers select records by timestamp range or
+// by arbitrary field equality / regex. MultiFilter composes multiple filters
+// with AND semantics.
 //
 // # Transformation
 //
-// Transformer supports field-level operations: rename, drop, add, and
-// template-based computed fields. TransformPipeline chains transformers.
+// Transformer supports RenameField, DropField, AddField and more.
+// Truncator, Flattener, Masker, Caster, and Highlighter each address a
+// specific field-level transformation need.
 //
-// # Aggregation
+// # Aggregation & deduplication
 //
-// RunAggregate groups records by a key field and computes counts.
+// AggregateResult and RunAggregate count records grouped by a field value.
+// Deduplicator removes repeated records based on a key field or whole-record
+// identity.
 //
-// # Deduplication
+// # Sampling, limiting, sorting
 //
-// Deduplicator tracks seen records by key fields (or whole-record hash)
-// and drops duplicates. RunDedupe integrates deduplication into a
-// streaming pipeline with Stats reporting.
+// Sampler keeps every N-th record. Limiter stops after N records. Sorter
+// orders records by a numeric or string field. Tailer / Header return the
+// last / first N records respectively.
+//
+// # Annotation
+//
+// Highlighter annotates matching substrings inside a chosen field using one
+// of three modes: bracket ([[match]]), upper (MATCH), or mark (>>>value).
 //
 // # Output
 //
 // Writer supports JSON, pretty-printed JSON, and CSV output formats.
-//
-// # Statistics
-//
-// Stats tracks valid, invalid, and matched record counts across a run.
 package filter
