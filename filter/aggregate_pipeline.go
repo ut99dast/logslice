@@ -8,6 +8,8 @@ import (
 
 // RunAggregate reads JSON log lines from r, aggregates counts for the given
 // field among lines that match f, and writes a summary table to w.
+// Lines that cannot be parsed as JSON are silently skipped.
+// If f is nil, all parseable lines are included in the aggregation.
 func RunAggregate(r io.Reader, w io.Writer, field string, f Filter) error {
 	result := NewAggregateResult(field)
 	scanner := bufio.NewScanner(r)
@@ -27,10 +29,24 @@ func RunAggregate(r io.Reader, w io.Writer, field string, f Filter) error {
 	}
 
 	entries := result.Sorted()
-	fmt.Fprintf(w, "%-40s %s\n", field, "count")
-	fmt.Fprintf(w, "%-40s %s\n", "----------------------------------------", "-----")
+	if err := writeAggregateTable(w, field, entries); err != nil {
+		return fmt.Errorf("write error: %w", err)
+	}
+	return nil
+}
+
+// writeAggregateTable formats and writes the aggregation results as a table.
+func writeAggregateTable(w io.Writer, field string, entries []AggregateEntry) error {
+	if _, err := fmt.Fprintf(w, "%-40s %s\n", field, "count"); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(w, "%-40s %s\n", "----------------------------------------", "-----"); err != nil {
+		return err
+	}
 	for _, e := range entries {
-		fmt.Fprintf(w, "%-40s %d\n", e.Value, e.Count)
+		if _, err := fmt.Fprintf(w, "%-40s %d\n", e.Value, e.Count); err != nil {
+			return err
+		}
 	}
 	return nil
 }
