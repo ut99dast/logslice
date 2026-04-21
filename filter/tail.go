@@ -46,6 +46,14 @@ func (t *Tailer) Records() []map[string]interface{} {
 	return out
 }
 
+// Len returns the number of records currently held in the buffer.
+func (t *Tailer) Len() int {
+	if t.full {
+		return t.n
+	}
+	return t.pos
+}
+
 // Reset clears the buffer.
 func (t *Tailer) Reset() {
 	t.buffer = make([]map[string]interface{}, t.n)
